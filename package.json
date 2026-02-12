@@ -1,0 +1,14 @@
+{
+  "name": "home-cooked-bytes",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Sirvist home-cooked-bytes lab OS",
+  "scripts": {
+    "lint": "echo 'No JS/TS lint configured yet'",
+    "format": "echo 'No JS/TS formatter configured yet'"
+  },
+  "devDependencies": {
+    "eslint": "^9.2.0",
+    "prettier": "^3.3.3"
+  }
+}

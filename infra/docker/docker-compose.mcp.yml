@@ -1,0 +1,75 @@
+name: home-cooked-bytes
+
+services:
+  redis:
+    image: redis:7.2-alpine
+    container_name: hcb_redis
+    ports:
+      - "6381:6379"
+    volumes:
+      - hcb_redis_data:/data
+
+  postgres:
+    image: postgres:16.3
+    container_name: hcb_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - hcb_postgres_data:/var/lib/postgresql/data
+
+  neo4j:
+    image: neo4j:5.18.1
+    container_name: hcb_neo4j
+    ports:
+      - "7475:7474"
+      - "7688:7687"
+    environment:
+      NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"
+    volumes:
+      - hcb_neo4j_data:/data
+
+  weaviate:
+    image: semitechnologies/weaviate:1.24.1
+    container_name: hcb_weaviate
+    ports:
+      - "8092:8080"
+    environment:
+      QUERY_DEFAULTS_LIMIT: 25
+      AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: "true"
+      PERSISTENCE_DATA_PATH: "/var/lib/weaviate"
+    volumes:
+      - hcb_weaviate_data:/var/lib/weaviate
+
+  langflow:
+    image: langflowai/langflow:1.7.2
+    container_name: hcb_langflow
+    ports:
+      - "7861:7860"
+    environment:
+      LANGFLOW_LOG_LEVEL: "INFO"
+
+  langgraph:
+    image: langchain/langgraph-api:3.11-459ef42
+    container_name: hcb_langgraph
+    ports:
+      - "2026:2024"
+
+  bifrost:
+    image: sirvist-lab-bifrost
+    container_name: hcb_bifrost
+    ports:
+      - "8081:8080"
+    environment:
+      BIFROST_URL: ${BIFROST_URL}
+      BIFROST_API_KEY: ${BIFROST_API_KEY}
+    volumes:
+      - ./bifrost:/app/bifrost_config:ro
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/creds/service-account.json:ro
+
+volumes:
+  hcb_redis_data:
+  hcb_postgres_data:
+  hcb_neo4j_data:
+  hcb_weaviate_data:

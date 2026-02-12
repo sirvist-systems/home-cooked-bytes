@@ -1,0 +1,9 @@
+DRIVE TO WORK (WSL)
+
+1) Open WSL Ubuntu
+2) cd /home/sirvist-lab/src/home-cooked-bytes
+3) codex
+
+Notes:
+- Prefer working in /home/... (WSL filesystem), not /mnt/c/...
+- If you need git wrappers from sirvist-lab, use /usr/bin/git explicitly here.

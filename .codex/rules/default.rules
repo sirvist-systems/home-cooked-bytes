@@ -1,0 +1,200 @@
+# Sirvist Codex ExecPolicy Rules (ship + safe)
+#
+# What these rules do:
+# - Decide whether a command is allowed, prompted, or forbidden.
+# - Sandbox settings (config.toml) decide *where* commands can write and whether shell has network.
+#
+# Solo-founder posture:
+# - Zero friction for web fetches + installs (ALLOW)
+# - Git push requires approval (PROMPT) — your safety latch
+# - Block irreversible foot-guns (FORBID)
+# - Prompt for “might overwrite/delete lots” operations (PROMPT)
+#
+# Tip: validate rules with:
+#   codex execpolicy check --rules <path-to-default.rules>
+# (Shows which rule matched and the strictest decision.)
+
+################################################################################
+# Allow: safe read-only inspection
+################################################################################
+
+prefix_rule(pattern=["git", "status"], decision="allow")
+prefix_rule(pattern=["git", "diff"], decision="allow")
+prefix_rule(pattern=["git", "log"], decision="allow")
+prefix_rule(pattern=["git", "show"], decision="allow")
+prefix_rule(pattern=["git", "branch"], decision="allow")
+
+prefix_rule(pattern=["rg"], decision="allow")
+prefix_rule(pattern=["ls"], decision="allow")
+prefix_rule(pattern=["dir"], decision="allow")
+prefix_rule(pattern=["Get-Content"], decision="allow")
+
+################################################################################
+# Allow: network fetches (no prompt)
+################################################################################
+
+prefix_rule(pattern=["curl"], decision="allow")
+prefix_rule(pattern=["wget"], decision="allow")
+
+# PowerShell wrappers (harmless in WSL, but fine to keep)
+prefix_rule(pattern=["powershell.exe", "-Command", ["Invoke-WebRequest", "iwr", "curl", "wget"]], decision="allow")
+prefix_rule(pattern=["pwsh.exe", "-Command", ["Invoke-WebRequest", "iwr", "curl", "wget"]], decision="allow")
+prefix_rule(pattern=["powershell.exe", "-Command", ["Invoke-RestMethod", "irm"]], decision="allow")
+prefix_rule(pattern=["pwsh.exe", "-Command", ["Invoke-RestMethod", "irm"]], decision="allow")
+prefix_rule(pattern=[r"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-Command", ["Invoke-WebRequest", "iwr", "curl", "wget"]], decision="allow")
+prefix_rule(pattern=[r"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-Command", ["Invoke-RestMethod", "irm"]], decision="allow")
+
+################################################################################
+# Allow: dependency installs (no prompt) — shippy mode
+################################################################################
+
+prefix_rule(pattern=["pip", "install"], decision="allow")
+prefix_rule(pattern=["pip3", "install"], decision="allow")
+prefix_rule(pattern=["python", "-m", "pip", "install"], decision="allow")
+prefix_rule(pattern=["py", "-m", "pip", "install"], decision="allow")
+
+prefix_rule(pattern=["npm", "install"], decision="allow")
+prefix_rule(pattern=["npm", "i"], decision="allow")
+prefix_rule(pattern=["pnpm", "install"], decision="allow")
+prefix_rule(pattern=["yarn", "add"], decision="allow")
+
+# NOTE: npx downloads + executes code. You asked for zero friction; keep awareness.
+prefix_rule(pattern=["npx"], decision="allow")
+prefix_rule(pattern=["uvx"], decision="allow")
+
+################################################################################
+# Allow: safe git network ops; Prompt: git push
+# NOTE: Temporary allow added to complete continuity push; revert if desired.
+################################################################################
+
+prefix_rule(pattern=["git", "clone"], decision="allow")
+prefix_rule(pattern=["git", "fetch"], decision="allow")
+prefix_rule(pattern=["git", "pull"], decision="allow")
+
+prefix_rule(pattern=["git", "push"], decision="allow")
+
+prefix_rule(
+    pattern=["git", "push"],
+    decision="prompt",
+    justification="git push publishes changes; require approval as your safety latch.",
+)
+
+# Forbid: history-rewriting pushes
+prefix_rule(
+    pattern=["git", "push", "--force"],
+    decision="forbidden",
+    justification="Force push rewrites remote history; do manually if absolutely necessary.",
+)
+prefix_rule(
+    pattern=["git", "push", "--force-with-lease"],
+    decision="prompt",
+    justification="Rewrites remote history; require explicit approval.",
+)
+
+################################################################################
+# Prompt/forbid: destructive git operations
+################################################################################
+
+# Absolute no: the classic lubeless incident
+prefix_rule(
+    pattern=["git", "reset", "--hard"],
+    decision="forbidden",
+    justification="Hard reset can destroy uncommitted work; avoid.",
+)
+prefix_rule(
+    pattern=["git", "reset"],
+    decision="prompt",
+    justification="git reset moves HEAD/rewrites history; require explicit approval.",
+)
+
+# Repo wiper
+prefix_rule(
+    pattern=["git", "clean", "-fdx"],
+    decision="forbidden",
+    justification="Deletes untracked + ignored files; too destructive.",
+)
+prefix_rule(
+    pattern=["git", "clean"],
+    decision="prompt",
+    justification="git clean deletes untracked files; require explicit approval.",
+)
+
+# Overwrite/discard zones
+prefix_rule(
+    pattern=["git", "checkout", "-f"],
+    decision="forbidden",
+    justification="git checkout -f forcibly discards changes; too easy to misuse.",
+)
+prefix_rule(
+    pattern=["git", "checkout"],
+    decision="prompt",
+    justification="git checkout can overwrite local changes; require explicit approval.",
+)
+
+prefix_rule(
+    pattern=["git", "switch", "--discard-changes"],
+    decision="forbidden",
+    justification="git switch --discard-changes discards work; too easy to misuse.",
+)
+prefix_rule(
+    pattern=["git", "switch"],
+    decision="prompt",
+    justification="git switch can discard/overwrite changes depending on flags; require approval.",
+)
+
+prefix_rule(
+    pattern=["git", "restore", "."],
+    decision="prompt",
+    justification="git restore . can wipe many changes at once; require explicit approval.",
+)
+prefix_rule(
+    pattern=["git", "restore"],
+    decision="prompt",
+    justification="git restore can overwrite local changes; require approval.",
+)
+
+# History/state changers that often create pain if run blindly
+prefix_rule(
+    pattern=["git", "merge"],
+    decision="prompt",
+    justification="git merge can create conflicts and change history state; require approval.",
+)
+prefix_rule(
+    pattern=["git", "rebase"],
+    decision="prompt",
+    justification="git rebase rewrites history; require explicit approval.",
+)
+
+################################################################################
+# Prompt/forbid: destructive filesystem operations
+################################################################################
+
+prefix_rule(
+    pattern=["rm", "-rf"],
+    decision="forbidden",
+    justification="rm -rf is a repo-killer; do it manually if you truly mean it.",
+)
+prefix_rule(
+    pattern=["rm", "-r", "-f"],
+    decision="forbidden",
+    justification="rm -r -f is rm -rf with different tokens; too destructive.",
+)
+prefix_rule(
+    pattern=["rm"],
+    decision="prompt",
+    justification="Filesystem deletes require explicit approval.",
+)
+
+prefix_rule(pattern=["del"], decision="prompt", justification="Filesystem deletes require explicit approval.")
+prefix_rule(pattern=["rmdir"], decision="prompt", justification="Directory deletes require explicit approval.")
+prefix_rule(pattern=["Remove-Item"], decision="prompt", justification="Remove-Item can be destructive; require explicit approval.")
+prefix_rule(pattern=["powershell.exe", "-Command", "Remove-Item"], decision="prompt", justification="Remove-Item can be destructive; require explicit approval.")
+prefix_rule(pattern=["pwsh.exe", "-Command", "Remove-Item"], decision="prompt", justification="Remove-Item can be destructive; require explicit approval.")
+prefix_rule(pattern=[r"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe", "-Command", "Remove-Item"], decision="prompt", justification="Remove-Item can be destructive; require explicit approval.")
+
+################################################################################
+# Allow: commit workflow (your checkpoint mechanism)
+################################################################################
+
+prefix_rule(pattern=["git", "add"], decision="allow")
+prefix_rule(pattern=["git", "commit"], decision="allow")

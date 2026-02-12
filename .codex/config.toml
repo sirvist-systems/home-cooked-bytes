@@ -1,0 +1,183 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+################################################################################
+# Profile: Balanced (TEAM/REPO)
+################################################################################
+
+# 1) MODEL DEFAULTS
+model = "gpt-5.2"
+review_model = "gpt-5.2"
+model_provider = "openai"
+oss_provider = "ollama"
+project_root_markers = [".git"]
+
+# 2) WEB SEARCH TOOL
+web_search = "live"
+
+# 3) REASONING DEFAULTS
+model_reasoning_effort = "medium"
+model_reasoning_summary = "concise"
+model_verbosity = "medium"
+model_supports_reasoning_summaries = false
+
+# 4) APPROVALS + SANDBOX
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+sandbox_workspace_write.network_access = true
+sandbox_workspace_write.exclude_tmpdir_env_var = false
+sandbox_workspace_write.exclude_slash_tmp = false
+
+# 5) SHELL ENV POLICY
+shell_environment_policy.inherit = "all"
+shell_environment_policy.ignore_default_excludes = false
+shell_environment_policy.exclude = ["*KEY*", "*SECRET*", "*TOKEN*"]
+shell_environment_policy.include_only = []
+shell_environment_policy.set = {}
+shell_environment_policy.experimental_use_profile = false
+
+# 6) FEATURES
+[features]
+apply_patch_freeform = false
+apps = true
+collaboration_modes = true
+collab = true
+experimental_windows_sandbox = false
+elevated_windows_sandbox = false
+personality = true
+remote_models = false
+runtime_metrics = false
+request_rule = true
+shell_snapshot = true
+shell_tool = true
+use_linux_sandbox_bwrap = false
+unified_exec = true
+undo = true
+powershell_utf8 = true
+child_agents_md = false
+
+# 7) TUI SETTINGS
+[tui]
+experimental_mode = "plan"
+
+# 8) MCP SERVERS
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+# [mcp_servers.langchain-docs]
+# url = "https://docs.langchain.com/mcp"
+
+[mcp_servers.context7]
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[mcp_servers.sequentialthinking]
+command = "docker"
+args = ["run", "-i", "--rm", "mcp/sequentialthinking"]
+
+
+[mcp_servers.sirvist]
+startup_timeout_sec = 30
+command = "bash"
+args = [
+  "-lc",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/sirvist_mcp_server.py; else python3 mcp_servers/sirvist_mcp_server.py; fi",
+]
+
+[mcp_servers.brave-search]
+startup_timeout_sec = 20
+command = "bash"
+args = [
+  "-lc",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/brave_search_mcp_server.py; else python3 mcp_servers/brave_search_mcp_server.py; fi",
+]
+env_vars = ["BRAVE_SEARCH_API_KEY", "BRAVE_API_KEY"]
+
+[mcp_servers.openapi-local]
+startup_timeout_sec = 20
+command = "bash"
+args = [
+  "-lc",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/openapi_local_mcp_server.py; else python3 mcp_servers/openapi_local_mcp_server.py; fi",
+]
+env_vars = ["SIRVIST_OPENAPI_SOURCE"]
+
+[mcp_servers.redis]
+startup_timeout_sec = 30
+command = "uvx"
+args = ["--from", "redis-mcp-server@latest", "redis-mcp-server", "--url", "${REDIS_URL}"]
+
+[mcp_servers.postgres]
+startup_timeout_sec = 30
+command = "npx"
+args = ["-y", "@modelcontextprotocol/server-postgres", "${POSTGRES_URL}"]
+
+[mcp_servers.neo4j]
+startup_timeout_sec = 30
+command = "neo4j-mcp"
+env = { NEO4J_TELEMETRY = "false" }
+env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "NEO4J_READ_ONLY"]
+
+[mcp_servers.graphiti-memory]
+startup_timeout_sec = 30
+command = "uvx"
+args = ["montesmakes.graphiti-memory", "--transport", "stdio"]
+env = { GRAPHITI_TELEMETRY_ENABLED = "false" }
+env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "OPENAI_API_KEY"]
+
+[mcp_servers.langgraph]
+startup_timeout_sec = 30
+url = "${LANGGRAPH_URL}"
+
+[mcp_servers.langflow]
+startup_timeout_sec = 30
+url = "${LANGFLOW_URL}"
+
+[mcp_servers.weaviate-docs]
+url = "https://weaviate-docs.mcp.kapa.ai"
+
+[mcp_servers.weaviate]
+enabled = true
+startup_timeout_sec = 30
+command = "mcp-server-weaviate"
+env_vars = ["WEAVIATE_URL", "WEAVIATE_API_KEY"]
+
+# [mcp_servers.redis]
+# startup_timeout_sec = 30
+# command = "uvx"
+# args = ["--from", "redis-mcp-server@latest", "redis-mcp-server", "--url", "redis://localhost:6379/0"]
+
+# [mcp_servers.postgres]
+# startup_timeout_sec = 30
+# command = "npx"
+# args = ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/postgres"]
+
+# [mcp_servers.neo4j]
+# startup_timeout_sec = 30
+# command = "neo4j-mcp"
+# env = { NEO4J_TELEMETRY = "false" }
+# env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "NEO4J_READ_ONLY"]
+
+# [mcp_servers.graphiti-memory]
+# startup_timeout_sec = 30
+# command = "uvx"
+# args = ["montesmakes.graphiti-memory", "--transport", "stdio"]
+# env = { GRAPHITI_TELEMETRY_ENABLED = "false" }
+# env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "OPENAI_API_KEY"]
+
+# [mcp_servers.langgraph]
+# startup_timeout_sec = 30
+# url = "http://localhost:2024/mcp"
+
+# [mcp_servers.langflow]
+# startup_timeout_sec = 30
+# url = "http://localhost:7860/api/v1/mcp/streamable"
+
+# [mcp_servers.weaviate-docs]
+# url = "https://weaviate-docs.mcp.kapa.ai"
+
+# [mcp_servers.weaviate]
+# enabled = true
+# startup_timeout_sec = 30
+# command = "mcp-server-weaviate"
+# env_vars = ["WEAVIATE_URL", "WEAVIATE_API_KEY"]
