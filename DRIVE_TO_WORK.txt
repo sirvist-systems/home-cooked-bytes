@@ -7,4 +7,3 @@ DRIVE TO WORK (WSL)
 Notes:
 - Prefer working in /home/... (WSL filesystem), not /mnt/c/...
 - If you need git wrappers from sirvist-lab, use /usr/bin/git explicitly here.
-

@@ -1,0 +1,20 @@
+[
+  "gpt-5.2-2025-12-11",
+  "gpt-5.2-chat-latest",
+  "gpt-5.1-2025-11-13",
+  "gpt-5.1-chat-latest",
+  "gpt-5-mini-2025-08-07",
+  "gpt-5-nano-2025-08-07",
+  "gpt-5.2-codex",
+  "gpt-5.1-codex-max",
+  "o3-2025-04-16",
+  "o3-deep-research-2025-06-26",
+  "o3-mini-2025-01-31",
+  "o4-mini",
+  "o4-mini-2025-04-16",
+  "o4-mini-deep-research",
+  "o4-mini-deep-research-2025-06-26",
+  "text-embedding-3-large",
+  "text-embedding-3-small",
+  "text-embedding-ada-002"
+]

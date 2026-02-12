@@ -85,6 +85,9 @@ __pypackages__/
 
 # Environments
 .env
+.credentials/
+.venv/
+node_modules/
 .envrc
 .venv
 env/
@@ -130,3 +133,5 @@ Thumbs.db
 06_session_continuity/
 .sirvist/
 00__feed-me-seymore/
+.env
+.env
