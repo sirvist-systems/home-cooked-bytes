@@ -33,3 +33,11 @@ If it's not listed here, it should be assumed **inactive**.
 
 ## MCP Enforcement
 - **Status:** None (runtime-only)
+
+## Git Graph Policy
+- **Policy:** `docs/ops/GIT_GRAPH_POLICY.md`
+- **Status:** Active (must follow for every task)
+
+## Repo-local Toolchains
+- **Status:** Active (convention)
+- **Rule:** Any one-off project tooling should live under `tools/` (avoid polluting product `src/`).

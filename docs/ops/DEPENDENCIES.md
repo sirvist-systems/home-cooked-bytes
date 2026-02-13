@@ -1,8 +1,16 @@
 # Dependencies (home-cooked-bytes)
 
+Update (UTC): 2026-02-13 15:50:47Z
+
 ## Python (MCP runtime)
 - `requirements-mcp.txt`
-- Managed by `pip` inside `.venv`
+- Locked in `requirements-mcp.lock.txt`
+- Installed reproducibly with `uv pip sync` (see `README_MCP_DEPS.md`)
+
+## Shell utilities (required)
+- `direnv` (auto‑export env vars when you enter repo)
+- `jq` (JSON processing)
+- `jd` (JSON diff)
 
 ## Python (Quality tools)
 - `pyproject.toml` (ruff + mypy)

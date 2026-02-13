@@ -1,5 +1,7 @@
 name: home-cooked-bytes
 
+# Update (UTC): 2026-02-13 17:50:53Z
+
 services:
   redis:
     image: redis:7.2-alpine
@@ -19,6 +21,8 @@ services:
     volumes:
       - hcb_postgres_data:/var/lib/postgresql/data
 
+  # Shared env file provides secrets/URLs; keep it consistent with `.env.example`.
+
   neo4j:
     image: neo4j:5.18.1
     container_name: hcb_neo4j
@@ -27,6 +31,9 @@ services:
       - "7688:7687"
     environment:
       NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}"
+      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*,gds.*"
+      NEO4J_dbms_security_procedures_allowlist: "apoc.*,gds.*"
     volumes:
       - hcb_neo4j_data:/data
 
@@ -51,25 +58,60 @@ services:
       LANGFLOW_LOG_LEVEL: "INFO"
 
   langgraph:
-    image: langchain/langgraph-api:3.11-459ef42
+    # Open-source local LangGraph dev server (no LangSmith license required).
+    # Mirrors the sirvist-lab `langgraph_deepagents_backend_sirvist` pattern.
+    image: python:3.12-slim
     container_name: hcb_langgraph
     ports:
       - "2026:2024"
+    environment:
+      # Disable external telemetry/tracing.
+      LANGCHAIN_TRACING_V2: "false"
+      LANGSMITH_TRACING: "false"
+      # If your graph routes model calls via Bifrost, keep these available.
+      BIFROST_URL: ${BIFROST_URL}
+      BIFROST_API_KEY: ${BIFROST_API_KEY}
+    depends_on:
+      - bifrost
+    volumes:
+      - ../langgraph_deepagents_backend:/app:rw
+    command:
+      - bash
+      - -lc
+      - |
+        pip install -U pip && \
+        pip install "langgraph-cli[inmem]" langgraph && \
+        cd /app && langgraph dev --host 0.0.0.0 --port 2024 --config /app/langgraph.json --no-browser --no-reload
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hcb_ollama
+    ports:
+      - "11436:11434"
+    volumes:
+      - hcb_ollama_data:/root/.ollama
 
   bifrost:
     image: sirvist-lab-bifrost
     container_name: hcb_bifrost
     ports:
-      - "8081:8080"
+      - "8084:8080"
     environment:
       BIFROST_URL: ${BIFROST_URL}
       BIFROST_API_KEY: ${BIFROST_API_KEY}
+    # The image attempts to check for updates on startup. If network/DNS is unreliable,
+    # consider pinning or disabling update checks inside the image.
     volumes:
       - ./bifrost:/app/bifrost_config:ro
       - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/creds/service-account.json:ro
+
+    # Avoid DNS/update checks during startup by running the server binary directly.
+    # (The Node wrapper in the image may attempt to fetch `getbifrost.ai`.)
+    command: ["bifrost", "start", "--host", "0.0.0.0", "--port", "8080"]
 
 volumes:
   hcb_redis_data:
   hcb_postgres_data:
   hcb_neo4j_data:
   hcb_weaviate_data:
+  hcb_ollama_data:
