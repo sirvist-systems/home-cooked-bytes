@@ -11,6 +11,7 @@ Policy:
 
 ## Inbox (Unsorted)
 - [ ] Workstream: `codex_tasks` | Next: confirm how VS Code “Turn TODOs into Codex tasks” maps to our workflow (do we use it or ignore it during migration?).
+- [ ] Workstream: `codex_ops` | Next: (HIGH) Re-establish Codex single source of truth + auto-alignment: consolidate repo-level Codex operating docs (enforcement, change surfaces, MCP runbooks, session-start read-order) into one authoritative entrypoint and generate/validate derived views so guidance doesn’t drift. Update (UTC): 2026-02-13 20:00:00Z
 
 ## Continuity
 - [ ] Workstream: `continuity_manual` | Next: write a 5-line “restart recipe” (where to look + which command to run) and pin it in `06_session_continuity/sessions/manual/SESSION_CONTINUITY_MASTER.md`.

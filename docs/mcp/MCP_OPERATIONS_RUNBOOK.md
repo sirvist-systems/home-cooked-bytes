@@ -12,6 +12,9 @@
 ## Healthcheck
 - `scripts/mcp/healthcheck.sh`
 
+Healthcheck performs **live probing** (not just env visibility) and returns a
+non-zero exit code if any required service/endpoint is unhealthy.
+
 ## Codex MCP Validation
 - `codex mcp list | sed -n '1,200p'`
 - `codex /mcp`
