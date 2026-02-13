@@ -1,5 +1,7 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
+# Update (UTC): 2026-02-13 17:51:17Z
+
 ################################################################################
 # Profile: Balanced (TEAM/REPO)
 ################################################################################
@@ -64,8 +66,8 @@ experimental_mode = "plan"
 [mcp_servers.openaiDeveloperDocs]
 url = "https://developers.openai.com/mcp"
 
-# [mcp_servers.langchain-docs]
-# url = "https://docs.langchain.com/mcp"
+[mcp_servers.langchain-docs]
+url = "https://docs.langchain.com/mcp"
 
 [mcp_servers.context7]
 command = "npx"
@@ -75,13 +77,12 @@ args = ["-y", "@upstash/context7-mcp"]
 command = "docker"
 args = ["run", "-i", "--rm", "mcp/sequentialthinking"]
 
-
 [mcp_servers.sirvist]
 startup_timeout_sec = 30
 command = "bash"
 args = [
   "-lc",
-  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/sirvist_mcp_server.py; else python3 mcp_servers/sirvist_mcp_server.py; fi",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; export PYTHONPATH=\"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/sirvist_mcp_server.py; else python3 mcp_servers/sirvist_mcp_server.py; fi",
 ]
 
 [mcp_servers.brave-search]
@@ -89,7 +90,7 @@ startup_timeout_sec = 20
 command = "bash"
 args = [
   "-lc",
-  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/brave_search_mcp_server.py; else python3 mcp_servers/brave_search_mcp_server.py; fi",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; export PYTHONPATH=\"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/brave_search_mcp_server.py; else python3 mcp_servers/brave_search_mcp_server.py; fi",
 ]
 env_vars = ["BRAVE_SEARCH_API_KEY", "BRAVE_API_KEY"]
 
@@ -98,7 +99,7 @@ startup_timeout_sec = 20
 command = "bash"
 args = [
   "-lc",
-  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/openapi_local_mcp_server.py; else python3 mcp_servers/openapi_local_mcp_server.py; fi",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; export PYTHONPATH=\"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/openapi_local_mcp_server.py; else python3 mcp_servers/openapi_local_mcp_server.py; fi",
 ]
 env_vars = ["SIRVIST_OPENAPI_SOURCE"]
 
@@ -115,11 +116,12 @@ args = ["-y", "@modelcontextprotocol/server-postgres", "${POSTGRES_URL}"]
 [mcp_servers.neo4j]
 startup_timeout_sec = 30
 command = "neo4j-mcp"
+args = ["--no-gds-check"]
 env = { NEO4J_TELEMETRY = "false" }
 env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "NEO4J_READ_ONLY"]
 
 [mcp_servers.graphiti-memory]
-startup_timeout_sec = 30
+startup_timeout_sec = 120
 command = "uvx"
 args = ["montesmakes.graphiti-memory", "--transport", "stdio"]
 env = { GRAPHITI_TELEMETRY_ENABLED = "false" }
@@ -128,56 +130,25 @@ env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "
 [mcp_servers.langgraph]
 startup_timeout_sec = 30
 url = "${LANGGRAPH_URL}"
+http_headers = { "Accept" = "application/json" }
 
 [mcp_servers.langflow]
+# LangFlow MCP is streamable HTTP (SSE) and expects JSON-RPC over HTTP POST.
+
 startup_timeout_sec = 30
 url = "${LANGFLOW_URL}"
+http_headers = { "Accept" = "application/json, text/event-stream" }
 
 [mcp_servers.weaviate-docs]
 url = "https://weaviate-docs.mcp.kapa.ai"
+enabled = false
 
 [mcp_servers.weaviate]
 enabled = true
 startup_timeout_sec = 30
-command = "mcp-server-weaviate"
+command = "bash"
+args = [
+  "-lc",
+  "REPO_ROOT=\"$(git rev-parse --show-toplevel 2>/dev/null || pwd)\"; cd \"$REPO_ROOT\"; export PYTHONPATH=\"$REPO_ROOT\"; if [ -x ./.venv/bin/python ]; then ./.venv/bin/python mcp_servers/weaviate_mcp_server.py; else python3 mcp_servers/weaviate_mcp_server.py; fi",
+]
 env_vars = ["WEAVIATE_URL", "WEAVIATE_API_KEY"]
-
-# [mcp_servers.redis]
-# startup_timeout_sec = 30
-# command = "uvx"
-# args = ["--from", "redis-mcp-server@latest", "redis-mcp-server", "--url", "redis://localhost:6379/0"]
-
-# [mcp_servers.postgres]
-# startup_timeout_sec = 30
-# command = "npx"
-# args = ["-y", "@modelcontextprotocol/server-postgres", "postgresql://localhost/postgres"]
-
-# [mcp_servers.neo4j]
-# startup_timeout_sec = 30
-# command = "neo4j-mcp"
-# env = { NEO4J_TELEMETRY = "false" }
-# env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "NEO4J_READ_ONLY"]
-
-# [mcp_servers.graphiti-memory]
-# startup_timeout_sec = 30
-# command = "uvx"
-# args = ["montesmakes.graphiti-memory", "--transport", "stdio"]
-# env = { GRAPHITI_TELEMETRY_ENABLED = "false" }
-# env_vars = ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "NEO4J_DATABASE", "OPENAI_API_KEY"]
-
-# [mcp_servers.langgraph]
-# startup_timeout_sec = 30
-# url = "http://localhost:2024/mcp"
-
-# [mcp_servers.langflow]
-# startup_timeout_sec = 30
-# url = "http://localhost:7860/api/v1/mcp/streamable"
-
-# [mcp_servers.weaviate-docs]
-# url = "https://weaviate-docs.mcp.kapa.ai"
-
-# [mcp_servers.weaviate]
-# enabled = true
-# startup_timeout_sec = 30
-# command = "mcp-server-weaviate"
-# env_vars = ["WEAVIATE_URL", "WEAVIATE_API_KEY"]
