@@ -1,0 +1,32 @@
+# --- System & Dependencies ---
+.git/
+
+.DS_Store
+
+# --- CRITICAL: The Memory Crash Culprit ---
+# Ignored so the agent doesn't try to load 2GB+ into RAM
+00__feed-me-seymore/
+00__feed-me-seymore_staged/
+
+# --- Build & Dist ---
+dist/
+build/
+coverage/
+
+# --- Binary/Large Files (Keep logs visible for debugging) ---
+*.zip
+*.tar.gz
+*.iso
+*.bin
+*.exe
+*.db
+*.sqlite
+
+
+*.mp4
+
+# --- Locks ---
+
+
+# --- Safety ---
+01_codebase/scripts/ingestion/parallel_ingest_final.py

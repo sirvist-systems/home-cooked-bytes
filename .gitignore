@@ -118,6 +118,9 @@ Thumbs.db
 **/gcp_creds*.json
 **/*.pem
 **/*.p12
+
+# Patent sprint outputs (local only)
+00_current/patent_packets/
 **/*neo4j*pw*.txt
 **/*api_key*.txt
 

@@ -1,9 +1,27 @@
 DRIVE TO WORK (WSL)
 
-1) Open WSL Ubuntu
-2) cd /home/sirvist-lab/src/home-cooked-bytes
-3) codex
+Update (UTC): 2026-02-13 15:53:06Z
 
-Notes:
-- Prefer working in /home/... (WSL filesystem), not /mnt/c/...
-- If you need git wrappers from sirvist-lab, use /usr/bin/git explicitly here.
+Start here (home-cooked-bytes only):
+1) `cd /home/sirvist-lab/src/home-cooked-bytes`
+2) `direnv allow`  # first time only; after that it auto-loads env vars
+3) `bash scripts/mcp/up.sh`
+4) `codex`
+
+What you do NOT have to do each time:
+- You do NOT need to activate a venv.
+- You do NOT need to manually export env vars if direnv is installed.
+- You do NOT need to run any “init” step.
+
+Alignment (60 seconds):
+1) `session_continuity/summaries/20260213_session_handoff.md`
+2) `00_current/codex_active_tasks.md`
+
+Rules:
+- Keep sessions split by repo; sirvist-lab is read-only quarry.
+- If Codex throws MCP errors, re-run step 2.
+
+Required tools (install once, then forget):
+- `direnv`
+- `jq`
+- `jd`
