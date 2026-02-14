@@ -52,6 +52,9 @@ export OLLAMA_HOST="${OLLAMA_HOST:-http://127.0.0.1:11436}"
 
 export BIFROST_URL="${BIFROST_URL:-http://127.0.0.1:8084}"
 
+# Keep tool caches inside writable sandbox roots.
+export PRE_COMMIT_HOME="${PRE_COMMIT_HOME:-/tmp/pre-commit}"
+
 # Prefer compose port for this repo, even if .env points elsewhere.
 if [ "${BIFROST_URL}" = "http://localhost:8080" ]; then
   export BIFROST_URL="http://127.0.0.1:8084"
