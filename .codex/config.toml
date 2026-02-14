@@ -23,7 +23,7 @@ model_verbosity = "medium"
 model_supports_reasoning_summaries = false
 
 # 4) APPROVALS + SANDBOX
-approval_policy = "on-request"
+approval_policy = "on-failure"
 sandbox_mode = "workspace-write"
 sandbox_workspace_write.network_access = true
 sandbox_workspace_write.exclude_tmpdir_env_var = false
