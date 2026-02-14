@@ -8,9 +8,9 @@ Rules:
 - If a task needs more than 2 concrete sub-steps, split it.
 
 ## Doing
-- [ ] Verify `sirvist-checkpoint` artifacts exist for this session (folder path + key files) and record the pointer in `06_session_continuity/sessions/manual/`.
+- [ ] Verify `sirvist-checkpoint` artifacts exist for this session (folder path + key files) and record the pointer in `session_continuity/`.
 
-  - Checkpoint pointer: `06_session_continuity/sessions/manual/021226_014821_config_toml_environment_stabilize_for_migrate/`
+  - Checkpoint pointer: `session_continuity/summaries/20260213_session_handoff.md`
 
 ## Next
 - [ ] Explore safe repo automation workflows (IP-safe)
@@ -31,5 +31,5 @@ Rules:
 - [ ] Enable GitHub auto-delete merged branches (repo setting).
 
 ## Done
-- [x] Captured checkpoint pointer for migration stability: `06_session_continuity/sessions/manual/021226_014821_config_toml_environment_stabilize_for_migrate/`. (GH-ISSUE: 2)
+- [x] Captured checkpoint pointer for migration stability: `session_continuity/summaries/20260213_session_handoff.md`. (GH-ISSUE: 2)
 - [x] Stabilize Codex MCP set for migration (minimal servers + verified config load). (GH-ISSUE: 3)
