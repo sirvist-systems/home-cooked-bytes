@@ -22,7 +22,13 @@ if [ -z "${POSTGRES_PASSWORD:-}" ] && [ -f .env ]; then
 fi
 
 export POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-}"
-export POSTGRES_URL="${POSTGRES_URL:-postgresql://postgres:${POSTGRES_PASSWORD}@localhost:5433/postgres}"
+if [ -n "${POSTGRES_PASSWORD}" ]; then
+  # URL-encode reserved characters (notably `@`) so DSNs parse correctly.
+  POSTGRES_PASSWORD_ENC="$(python3 -c 'import os, urllib.parse as u; print(u.quote(os.environ["POSTGRES_PASSWORD"], safe=""))')"
+  export POSTGRES_URL="${POSTGRES_URL:-postgresql://postgres:${POSTGRES_PASSWORD_ENC}@localhost:5433/postgres}"
+else
+  export POSTGRES_URL="${POSTGRES_URL:-postgresql://postgres@localhost:5433/postgres}"
+fi
 
 # Prefer the repo compose ports even if `.env` came from another stack.
 if [[ "${REDIS_URL}" == "redis://localhost:6379"* ]]; then
@@ -45,6 +51,9 @@ export LANGGRAPH_URL="${LANGGRAPH_URL:-http://localhost:2026/mcp}"
 export OLLAMA_HOST="${OLLAMA_HOST:-http://127.0.0.1:11436}"
 
 export BIFROST_URL="${BIFROST_URL:-http://127.0.0.1:8084}"
+
+# Keep tool caches inside writable sandbox roots.
+export PRE_COMMIT_HOME="${PRE_COMMIT_HOME:-/tmp/pre-commit}"
 
 # Prefer compose port for this repo, even if .env points elsewhere.
 if [ "${BIFROST_URL}" = "http://localhost:8080" ]; then
