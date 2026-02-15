@@ -13,6 +13,8 @@ Rules:
   - Checkpoint pointer: `session_continuity/summaries/20260213_session_handoff.md`
 
 ## Next
+- [ ] Bifrost: multi-region instances (global/us-central1/us-south1) + real healthchecks
+- [ ] Confirm Bifrost region routing + provider setup flow (Vertex/Gemini MaaS)
 - [ ] Explore safe repo automation workflows (IP-safe)
   - [ ] Survey OpenAI/Codex-supported automation patterns (e.g., CLI + policies + background agents)
   - [ ] Define what is safe to automate vs must-prompt actions

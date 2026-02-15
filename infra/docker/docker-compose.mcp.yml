@@ -64,6 +64,9 @@ services:
     container_name: hcb_langgraph
     ports:
       - "2026:2024"
+    # Run as the host user to avoid root-owned files on bind mounts.
+    # Uses shell defaults if UID/GID are unset.
+    user: "${UID:-1000}:${GID:-1001}"
     environment:
       # Disable external telemetry/tracing.
       LANGCHAIN_TRACING_V2: "false"
@@ -71,6 +74,9 @@ services:
       # If your graph routes model calls via Bifrost, keep these available.
       BIFROST_URL: ${BIFROST_URL}
       BIFROST_API_KEY: ${BIFROST_API_KEY}
+      # Ensure Python user installs have a writable home.
+      HOME: /tmp
+      PIP_CACHE_DIR: /tmp/pip-cache
     depends_on:
       - bifrost
     volumes:
@@ -79,8 +85,9 @@ services:
       - bash
       - -lc
       - |
-        pip install -U pip && \
-        pip install "langgraph-cli[inmem]" langgraph && \
+        python -m pip install -U pip && \
+        python -m pip install --no-warn-script-location "langgraph-cli[inmem]" langgraph && \
+        export PATH="/tmp/.local/bin:$PATH" && \
         cd /app && langgraph dev --host 0.0.0.0 --port 2024 --config /app/langgraph.json --no-browser --no-reload
 
   ollama:
@@ -96,18 +103,91 @@ services:
     container_name: hcb_bifrost
     ports:
       - "8084:8080"
+    user: "root"
     environment:
       BIFROST_URL: ${BIFROST_URL}
       BIFROST_API_KEY: ${BIFROST_API_KEY}
+      APP_DIR: /app/data
+      BIFROST_CONFIG: /app/bifrost_config/config.json
+      XDG_CONFIG_HOME: /app/data
+      HOME: /app/data
     # The image attempts to check for updates on startup. If network/DNS is unreliable,
     # consider pinning or disabling update checks inside the image.
     volumes:
-      - ./bifrost:/app/bifrost_config:ro
+      - ./bifrost:/app/bifrost_config:rw
+      - hcb_bifrost_global_data:/app/data
       - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/creds/service-account.json:ro
+    entrypoint:
+      - sh
+      - -lc
+      - |
+        mkdir -p /app/data && \
+        chown -R ${UID:-1000}:${GID:-1001} /app/data && \
+        exec su node -s /bin/sh -c 'exec docker-entrypoint.sh bifrost start --host 0.0.0.0 --port 8080 -app-dir /app/data'
 
     # Avoid DNS/update checks during startup by running the server binary directly.
     # (The Node wrapper in the image may attempt to fetch `getbifrost.ai`.)
-    command: ["bifrost", "start", "--host", "0.0.0.0", "--port", "8080"]
+    command:
+      - bifrost
+      - start
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8080"
+      - -app-dir
+      - /app/data
+
+  bifrost_us_central1:
+    image: sirvist-lab-bifrost
+    container_name: hcb_bifrost_us_central1
+    ports:
+      - "8082:8080"
+    user: "root"
+    environment:
+      BIFROST_URL: ${BIFROST_US_CENTRAL1_URL}
+      BIFROST_API_KEY: ${BIFROST_US_CENTRAL1_API_KEY}
+      VERTEX_REGION: ${VERTEX_REGION_US_CENTRAL1}
+      APP_DIR: /app/data
+      BIFROST_CONFIG: /app/bifrost_config/config.json
+      XDG_CONFIG_HOME: /app/data
+      HOME: /app/data
+    volumes:
+      - ./bifrost:/app/bifrost_config:rw
+      - hcb_bifrost_us_central1_data:/app/data
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/creds/service-account.json:ro
+    entrypoint:
+      - sh
+      - -lc
+      - |
+        mkdir -p /app/data && \
+        chown -R ${UID:-1000}:${GID:-1001} /app/data && \
+        exec su node -s /bin/sh -c 'exec docker-entrypoint.sh bifrost start --host 0.0.0.0 --port 8080 -app-dir /app/data'
+
+  bifrost_us_south1:
+    image: sirvist-lab-bifrost
+    container_name: hcb_bifrost_us_south1
+    ports:
+      - "8083:8080"
+    user: "root"
+    environment:
+      BIFROST_URL: ${BIFROST_US_SOUTH1_URL}
+      BIFROST_API_KEY: ${BIFROST_US_SOUTH1_API_KEY}
+      VERTEX_REGION: ${VERTEX_REGION_US_SOUTH1}
+      APP_DIR: /app/data
+      BIFROST_CONFIG: /app/bifrost_config/config.json
+      XDG_CONFIG_HOME: /app/data
+      HOME: /app/data
+    volumes:
+      - ./bifrost:/app/bifrost_config:rw
+      - hcb_bifrost_us_south1_data:/app/data
+      - ${GOOGLE_APPLICATION_CREDENTIALS}:/app/creds/service-account.json:ro
+    entrypoint:
+      - sh
+      - -lc
+      - |
+        mkdir -p /app/data && \
+        chown -R ${UID:-1000}:${GID:-1001} /app/data && \
+        exec su node -s /bin/sh -c 'exec docker-entrypoint.sh bifrost start --host 0.0.0.0 --port 8080 -app-dir /app/data'
 
 volumes:
   hcb_redis_data:
@@ -115,3 +195,6 @@ volumes:
   hcb_neo4j_data:
   hcb_weaviate_data:
   hcb_ollama_data:
+  hcb_bifrost_global_data:
+  hcb_bifrost_us_central1_data:
+  hcb_bifrost_us_south1_data:

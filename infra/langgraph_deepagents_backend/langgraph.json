@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "langgraph-cli[inmem]",
+    "langgraph"
+  ],
+  "graphs": {
+    "deepagents": "./agent.py:agent"
+  }
+}
