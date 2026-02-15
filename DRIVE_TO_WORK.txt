@@ -1,6 +1,6 @@
 DRIVE TO WORK (WSL)
 
-Update (UTC): 2026-02-14 06:05:00Z
+Update (UTC): 2026-02-15 03:49:30Z
 
 This file is the **daily-start SSOT for this machine**. Don’t duplicate these steps
 in other docs—link here.
@@ -13,6 +13,9 @@ Start here (home-cooked-bytes only):
 3) Start local services: `bash scripts/mcp/up.sh`
 4) SSOT gate (stack is actually usable): `bash scripts/mcp/healthcheck.sh`
 5) Start Codex **in this same shell** (so it inherits env vars): `codex`
+
+Optional (deeper “is LLM responding?” gate):
+- `HEALTHCHECK_OLLAMA_CHAT_MODEL=qwen2.5:7b bash scripts/mcp/healthcheck.sh`
 
 What you do NOT have to do each time:
 - You do NOT need to activate a venv (unless working on MCP deps).
