@@ -1,25 +1,39 @@
 DRIVE TO WORK (WSL)
 
-Update (UTC): 2026-02-13 15:53:06Z
+Update (UTC): 2026-02-15 03:49:30Z
+
+This file is the **daily-start SSOT for this machine**. Don’t duplicate these steps
+in other docs—link here.
 
 Start here (home-cooked-bytes only):
 1) `cd /home/sirvist-lab/src/home-cooked-bytes`
-2) `direnv allow`  # first time only; after that it auto-loads env vars
-3) `bash scripts/mcp/up.sh`
-4) `codex`
+2) Ensure env is loaded (pick one):
+   - Recommended: `direnv allow` (first time only; then it auto-loads)
+   - Manual: `source scripts/mcp/env.sh`
+3) Start local services: `bash scripts/mcp/up.sh`
+4) SSOT gate (stack is actually usable): `bash scripts/mcp/healthcheck.sh`
+5) Start Codex **in this same shell** (so it inherits env vars): `codex`
+
+Optional (deeper “is LLM responding?” gate):
+- `HEALTHCHECK_OLLAMA_CHAT_MODEL=qwen2.5:7b bash scripts/mcp/healthcheck.sh`
 
 What you do NOT have to do each time:
-- You do NOT need to activate a venv.
-- You do NOT need to manually export env vars if direnv is installed.
+- You do NOT need to activate a venv (unless working on MCP deps).
+- You do NOT need to manually export env vars if `direnv` is installed.
 - You do NOT need to run any “init” step.
 
 Alignment (60 seconds):
-1) `session_continuity/summaries/20260213_session_handoff.md`
+1) `session_continuity/summaries/20260213_session_handoff.md` (or latest)
 2) `00_current/codex_active_tasks.md`
+
+If Codex shows MCP/handshake errors:
+1) Re-run the SSOT gate: `bash scripts/mcp/healthcheck.sh`
+2) Re-run Codex MCP init: `codex /mcp`
+3) If still broken, check: `docs/mcp/MCP_OPERATIONS_RUNBOOK.md`
 
 Rules:
 - Keep sessions split by repo; sirvist-lab is read-only quarry.
-- If Codex throws MCP errors, re-run step 2.
+- If Codex throws MCP errors, re-run the SSOT gate.
 
 Required tools (install once, then forget):
 - `direnv`

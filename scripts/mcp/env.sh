@@ -52,12 +52,24 @@ export OLLAMA_HOST="${OLLAMA_HOST:-http://127.0.0.1:11436}"
 
 export BIFROST_URL="${BIFROST_URL:-http://127.0.0.1:8084}"
 
+# Optional multi-region Bifrost endpoints (for Vertex/Gemini MaaS).
+export BIFROST_US_CENTRAL1_URL="${BIFROST_US_CENTRAL1_URL:-http://127.0.0.1:8082}"
+export BIFROST_US_SOUTH1_URL="${BIFROST_US_SOUTH1_URL:-http://127.0.0.1:8083}"
+
 # Keep tool caches inside writable sandbox roots.
 export PRE_COMMIT_HOME="${PRE_COMMIT_HOME:-/tmp/pre-commit}"
 
 # Prefer compose port for this repo, even if .env points elsewhere.
 if [ "${BIFROST_URL}" = "http://localhost:8080" ]; then
   export BIFROST_URL="http://127.0.0.1:8084"
+fi
+
+if [ "${BIFROST_US_CENTRAL1_URL}" = "http://localhost:8082" ]; then
+  export BIFROST_US_CENTRAL1_URL="http://127.0.0.1:8082"
+fi
+
+if [ "${BIFROST_US_SOUTH1_URL}" = "http://localhost:8083" ]; then
+  export BIFROST_US_SOUTH1_URL="http://127.0.0.1:8083"
 fi
 
 set +a

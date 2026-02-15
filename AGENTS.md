@@ -1,6 +1,6 @@
 # Home Cooked Bytes — Agent Instructions
 
-Update (UTC): 2026-02-13 10:15:31Z
+Update (UTC): 2026-02-14 06:05:00Z
 
 These instructions apply to this repository and all subdirectories.
 
@@ -12,9 +12,17 @@ These instructions apply to this repository and all subdirectories.
 
 ## Accuracy
 
-- Before writing code for anything beyond a quick script, and especially for implementation, you must search online for current guidelines
-for implementation, Dev and/or vendor best practices, as well as use MCP's available to you, for example, Conext 7, SDK's, OpenAI Devleoper Docs.
-or any vendor specific guidelines
+- Before implementation beyond quick scripts:
+  - Prefer authoritative sources first: OpenAI Developer Docs MCP (Codex/OpenAI behavior), Context7 (vendor/library docs), and primary upstream docs.
+  - If sources conflict, call it out explicitly and choose the safest/default behavior.
+- Always look in the codebase for what already exists before coding to avoid duplication.
+
+## SSOT pointers (do not duplicate)
+
+- Daily start (personal): `DRIVE_TO_WORK.txt`
+- “What is canonical?” index: `docs/ops/SSOT_INDEX.md`
+- MCP operations: `docs/mcp/MCP_OPERATIONS_RUNBOOK.md`
+- Enforcement + constraints: `docs/ops/ACTIVE_ENFORCEMENT.md`, `docs/ops/CHANGE_SURFACES.md`, `docs/ops/GIT_GRAPH_POLICY.md`
 
 ## Safety
 

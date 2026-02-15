@@ -1,0 +1,38 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "vector_store": {
+    "enabled": true,
+    "type": "weaviate",
+    "config": {
+      "host": "weaviate:8080",
+      "scheme": "http"
+    }
+  },
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "/app/data/config.db"
+    }
+  },
+  "logs_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "/app/data/logs.db"
+    }
+  },
+  "logging": {
+    "enabled": true
+  },
+  "plugins": [
+    {
+      "name": "semantic_cache",
+      "enabled": false
+    },
+    {
+      "name": "telemetry",
+      "enabled": false
+    }
+  ]
+}

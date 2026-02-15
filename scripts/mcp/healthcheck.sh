@@ -344,6 +344,35 @@ probe_ollama() {
   return 1
 }
 
+ollama_chat_probe() {
+  local model="${1:-}"
+  if [[ -z "$model" ]]; then
+    log_warn "ollama chat skipped (no model specified)"
+    return 0
+  fi
+  if [[ -z "${OLLAMA_HOST:-}" ]]; then
+    log_fail "ollama env OLLAMA_HOST missing"
+    return 1
+  fi
+
+  local url="$OLLAMA_HOST/api/chat"
+  local payload
+  payload="$(jq -n --arg m "$model" '{model:$m, stream:false, messages:[{role:"user", content:"ping"}] }')"
+
+  local body
+  body="$(curl -m 12 -fsS -H 'Content-Type: application/json' -d "$payload" "$url" 2>/dev/null || true)"
+  if [[ -z "$body" ]]; then
+    log_fail "ollama chat empty model=$model"
+    return 1
+  fi
+  if jq -e '.message.content | type=="string" and length>0' >/dev/null 2>&1 <<<"$body"; then
+    log_pass "ollama chat model=$model"
+    return 0
+  fi
+  log_fail "ollama chat invalid model=$model"
+  return 1
+}
+
 probe_langflow() {
   if [[ -z "${LANGFLOW_URL:-}" ]]; then
     log_fail "langflow env LANGFLOW_URL missing"
@@ -361,24 +390,22 @@ probe_langgraph() {
 }
 
 probe_bifrost() {
-  local url="http://127.0.0.1:8084/health"
-  local status
-  status="$(curl -m 5 -sS -o /dev/null -w "%{http_code}" "$url" || true)"
-  if [[ "$status" == "200" ]]; then
-    log_pass "bifrost health 200"
+  local name="$1"
+  local port="$2"
+
+  local url="http://127.0.0.1:${port}/health"
+  local body
+  body="$(curl -m 5 -fsS "$url" 2>/dev/null || true)"
+  if [[ -z "$body" ]]; then
+    log_fail "$name health empty url=$url"
+    return 1
+  fi
+  if jq -e '.status == "ok" or .status == "healthy"' >/dev/null 2>&1 <<<"$body"; then
+    log_pass "$name health status=$(jq -r '.status' <<<"$body" 2>/dev/null || echo '?')"
     return 0
   fi
 
-  # Fallback to root if /health isn't implemented.
-  local root="http://127.0.0.1:8084/"
-  status="$(curl -m 5 -sS -o /dev/null -w "%{http_code}" "$root" || true)"
-  if [[ "$status" =~ ^2|3|4 ]]; then
-    # Even 404 from root is still proof the service is reachable.
-    log_pass "bifrost reachable status=$status"
-    return 0
-  fi
-
-  log_fail "bifrost unreachable 127.0.0.1:8084"
+  log_fail "$name health unexpected body=$(echo "$body" | tr -d '\n' | head -c 200)"
   return 1
 }
 
@@ -395,9 +422,12 @@ main() {
   probe_neo4j || true
   probe_weaviate || true
   probe_ollama || true
+  ollama_chat_probe "${HEALTHCHECK_OLLAMA_CHAT_MODEL:-}" || true
   probe_langflow || true
   probe_langgraph || true
-  probe_bifrost || true
+  probe_bifrost "bifrost_global" "8084" || true
+  probe_bifrost "bifrost_us_central1" "8082" || true
+  probe_bifrost "bifrost_us_south1" "8083" || true
 
   if [[ "$FAIL_COUNT" -gt 0 ]]; then
     echo "RESULT: FAIL (${PASS_COUNT} pass, ${WARN_COUNT} warn, ${FAIL_COUNT} fail)"

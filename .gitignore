@@ -132,6 +132,11 @@ Thumbs.db
 .codex/history*.jsonl
 .codex/state_*.sqlite*
 
+# LangGraph / MCP runtime state (local only)
+infra/langgraph_deepagents_backend/.langgraph_api/
+**/.langgraph_api/
+**/*.pckl
+
 # Sirvist continuity + local artifacts
 06_session_continuity/
 .sirvist/

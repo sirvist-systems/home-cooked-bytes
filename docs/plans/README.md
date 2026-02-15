@@ -15,3 +15,5 @@ Each plan lives in its own folder and uses a hybrid model:
 
 - `PLAN-0001-session-continuity/`
 - `PLAN-0002-dingleberry-protocol/`
+- `PLAN-0004-ssot-alignment/`
+- `PLAN-0005-bifrost-multiregion-healthcheck/`
